@@ -43,7 +43,7 @@ class Notepad:
             pass
 
         # set the window text
-        self.root.title("Untitled - Text-Editor")
+        self.root.title("Untitled - Text Editor")
 
         # center the window
         screenWidth = self.root.winfo_screenwidth()
@@ -62,28 +62,28 @@ class Notepad:
 
         self.thisTextArea.grid(sticky=N + E + S + W)
 
-        self.thisFileMenu.add_command(label="New", command=self.newFile,accelerator='Ctrl+N')
-        self.thisFileMenu.add_command(label="Open", command=self.openFile,accelerator='Ctrl+O')
-        self.thisFileMenu.add_command(label="Save", command=self.saveFile,accelerator='Ctrl+S')
+        self.thisFileMenu.add_command(label="New", command=self.newFile, accelerator='Ctrl+N')
+        self.thisFileMenu.add_command(label="Open", command=self.openFile, accelerator='Ctrl+O')
+        self.thisFileMenu.add_command(label="Save", command=self.saveFile, accelerator='Ctrl+S')
         self.thisFileMenu.add_separator()
-        self.thisFileMenu.add_command(label="Exit", command=self.quitApplication,accelerator='Ctrl+Q')
+        self.thisFileMenu.add_command(label="Exit", command=self.quitApplication, accelerator='Ctrl+Q')
         self.thisMenuBar.add_cascade(label="File", menu=self.thisFileMenu)
 
-        self.thisEditMenu.add_command(label="Select All", command=self.redo,accelerator='Ctrl+A')
+        self.thisEditMenu.add_command(label="Select All", command=self.redo, accelerator='Ctrl+A')
         self.thisEditMenu.add_separator()
-        self.thisEditMenu.add_command(label="Undo", command=self.undo,accelerator='Ctrl+Z')
-        self.thisEditMenu.add_command(label="Redo", command=self.redo,accelerator='Ctrl+Y')
+        self.thisEditMenu.add_command(label="Undo", command=self.undo, accelerator='Ctrl+Z')
+        self.thisEditMenu.add_command(label="Redo", command=self.redo, accelerator='Ctrl+Y')
         self.thisEditMenu.add_separator()
-        self.thisEditMenu.add_command(label="Cut", command=self.cut,accelerator='Ctrl+X')
-        self.thisEditMenu.add_command(label="Copy", command=self.copy,accelerator='Ctrl+C')
-        self.thisEditMenu.add_command(label="Paste", command=self.paste,accelerator='Ctrl+V')
+        self.thisEditMenu.add_command(label="Cut", command=self.cut, accelerator='Ctrl+X')
+        self.thisEditMenu.add_command(label="Copy", command=self.copy, accelerator='Ctrl+C')
+        self.thisEditMenu.add_command(label="Paste", command=self.paste, accelerator='Ctrl+V')
         self.thisMenuBar.add_cascade(label="Edit", menu=self.thisEditMenu)
 
-        self.thisFindMenu.add_command(label="Find", command=self.find,accelerator='Ctrl+F')
-        self.thisFindMenu.add_command(label="Replace", command=self.replace,accelerator='Ctrl+H')
+        self.thisFindMenu.add_command(label="Find", command=self.find, accelerator='Ctrl+F')
+        self.thisFindMenu.add_command(label="Replace", command=self.replace, accelerator='Ctrl+H')
         self.thisMenuBar.add_cascade(label="Find", menu=self.thisFindMenu)
 
-        self.thisHelpMenu.add_command(label="About Notepad", command=self.showAbout,accelerator='F1')
+        self.thisHelpMenu.add_command(label="About Notepad", command=self.showAbout, accelerator='F1')
         self.thisMenuBar.add_cascade(label="Help", menu=self.thisHelpMenu)
 
         self.root.config(menu=self.thisMenuBar)
@@ -95,85 +95,70 @@ class Notepad:
         self.thisTextArea.bind("<Control-Key-n>", self.newFile)
         self.thisTextArea.bind("<Control-Key-o>", self.openFile)
         self.thisTextArea.bind("<Control-Key-s>", self.saveFile)
+        self.thisTextArea.bind("<Control-Key-q>", self.quitApplication)
         self.thisTextArea.bind("<Control-Key-a>", self.select_all)
+        self.thisTextArea.bind("<Control-Key-z>", self.undo)
+        self.thisTextArea.bind("<Control-Key-y>", self.redo)
         self.thisTextArea.bind("<Control-Key-f>", self.find)
         self.thisTextArea.bind("<Control-Key-h>", self.replace)
         self.thisTextArea.bind("<F1>", self.showAbout)
 
-    def quitApplication(self,event=None):
+    def quitApplication(self, event=None):
         self.root.destroy()
         # exit()
 
-    def showAbout(self,event=None):
-        showinfo("Text-Editor", "Created by: Akul Gupta")
+    def showAbout(self, event=None):
+        showinfo("Text Editor", "Created by: Akul Gupta")
 
-    def openFile(self,event=None):
+    def openFile(self, event=None):
+        fileOpen = askyesnocancel("New File", "Do you want to save this file before opening a new file?")
+
+        if fileOpen is True:
+            self.saveFile()
+
+        elif fileOpen is None:
+            return
 
         self.file = askopenfilename(defaultextension=".txt",
                                     filetypes=[("All Files", "*.*"), ("Text Documents", "*.txt")])
 
-        if self.file == "":
-            # no file to open
-            self.file = None
-        else:
-            # try to open the file
-            # set the window title
-            self.root.title(os.path.basename(self.file) + " - Text-Editor")
+        if self.file:
+            self.root.title(os.path.basename(self.file) + " - Text Editor")
             self.thisTextArea.delete(1.0, END)
+            with open(self.file, 'r') as file:
+                self.thisTextArea.insert(1.0, file.read())
 
-            file = open(self.file, "r")
-
-            self.thisTextArea.insert(1.0, file.read())
-
-            file.close()
-
-    def newFile(self,event=None):
-        ok = askyesnocancel("New File", "Do you want to save this file before opening new file?")
-        if ok is False:
-            self.root.title("Untitled - Text-Editor")
-            self.file = None
-            self.thisTextArea.delete(1.0, END)
-        elif ok is True:
+    def newFile(self, event=None):
+        createFile = askyesnocancel("New File", "Do you want to save this file before creating a new file?")
+        if createFile is True:
             self.saveFile()
-            self.root.title("Untitled - Text-Editor")
-            self.file = None
-            self.thisTextArea.delete(1.0, END)
 
-    def saveFile(self,event=None):
+        self.root.title("Untitled - Text Editor")
+        self.file = None
+        self.thisTextArea.delete(1.0, END)
 
-        if self.file is None:
-            # save as new file
+    def saveFile(self, event=None):
+
+        if not self.file:
             self.file = asksaveasfilename(initialfile='Untitled.txt', defaultextension=".txt",
                                           filetypes=[("All Files", "*.*"), ("Text Documents", "*.txt")])
 
-            if self.file == "":
-                self.file = None
-            else:
-                # try to save the file
-                file = open(self.file, "w")
+        if self.file:
+            with open(self.file, 'w') as file:
                 file.write(self.thisTextArea.get(1.0, END))
-                file.close()
-                # change the window title
-                self.root.title(os.path.basename(self.file) + " - Notepad")
-
-
-        else:
-            file = open(self.file, "w")
-            file.write(self.thisTextArea.get(1.0, END))
-            file.close()
+            self.root.title(os.path.basename(self.file) + " - Text Editor")
 
     def select_all(self, event=None):
         self.thisTextArea.tag_add('sel', '1.0', 'end')
         return 'break'
 
-    def undo(self,event=None):
+    def undo(self, event=None):
         pass
 
-    def redo(self,event=None):
+    def redo(self, event=None):
         pass
 
-    def find(self,event=None):
-
+    def find(self, event=None):
         try:
             self.thisTextArea.tag_remove('highlight', '1.0', END)
         except:
@@ -193,7 +178,7 @@ class Notepad:
             self.thisTextArea.tag_config('highlight', foreground='red')
             start_pos = self.thisTextArea.search(string, end_pos, stopindex=END)
 
-    def replace(self,event=None):
+    def replace(self, event=None):
         pass
 
     def cut(self):
@@ -209,12 +194,9 @@ class Notepad:
 
         # run main application
 
-
         self.root.mainloop()
 
 
 # run main application
 notepad = Notepad(width=800, height=800)
 notepad.run()
-
-
