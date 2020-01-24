@@ -1,5 +1,6 @@
-from _tkinter import *
+from tkinter import *
 import os
+from tkinter import simpledialog
 from tkinter.messagebox import *
 from tkinter.filedialog import *
 
@@ -61,26 +62,28 @@ class Notepad:
 
         self.thisTextArea.grid(sticky=N + E + S + W)
 
-        self.thisFileMenu.add_command(label="New", command=self.newFile)
-        self.thisFileMenu.add_command(label="Open", command=self.openFile)
-        self.thisFileMenu.add_command(label="Save", command=self.saveFile)
+        self.thisFileMenu.add_command(label="New", command=self.newFile,accelerator='Ctrl+N')
+        self.thisFileMenu.add_command(label="Open", command=self.openFile,accelerator='Ctrl+O')
+        self.thisFileMenu.add_command(label="Save", command=self.saveFile,accelerator='Ctrl+S')
         self.thisFileMenu.add_separator()
-        self.thisFileMenu.add_command(label="Exit", command=self.quitApplication)
+        self.thisFileMenu.add_command(label="Exit", command=self.quitApplication,accelerator='Ctrl+Q')
         self.thisMenuBar.add_cascade(label="File", menu=self.thisFileMenu)
 
-        self.thisEditMenu.add_command(label="Undo",command=self.undo)
-        self.thisEditMenu.add_command(label="Redo",command=self.redo)
+        self.thisEditMenu.add_command(label="Select All", command=self.redo,accelerator='Ctrl+A')
         self.thisEditMenu.add_separator()
-        self.thisEditMenu.add_command(label="Cut", command=self.cut)
-        self.thisEditMenu.add_command(label="Copy", command=self.copy)
-        self.thisEditMenu.add_command(label="Paste", command=self.paste)
+        self.thisEditMenu.add_command(label="Undo", command=self.undo,accelerator='Ctrl+Z')
+        self.thisEditMenu.add_command(label="Redo", command=self.redo,accelerator='Ctrl+Y')
+        self.thisEditMenu.add_separator()
+        self.thisEditMenu.add_command(label="Cut", command=self.cut,accelerator='Ctrl+X')
+        self.thisEditMenu.add_command(label="Copy", command=self.copy,accelerator='Ctrl+C')
+        self.thisEditMenu.add_command(label="Paste", command=self.paste,accelerator='Ctrl+V')
         self.thisMenuBar.add_cascade(label="Edit", menu=self.thisEditMenu)
 
-        self.thisFindMenu.add_command(label="Find", command=self.find)
-        self.thisFindMenu.add_command(label="Replace", command=self.replace)
+        self.thisFindMenu.add_command(label="Find", command=self.find,accelerator='Ctrl+F')
+        self.thisFindMenu.add_command(label="Replace", command=self.replace,accelerator='Ctrl+H')
         self.thisMenuBar.add_cascade(label="Find", menu=self.thisFindMenu)
 
-        self.thisHelpMenu.add_command(label="About Notepad", command=self.showAbout)
+        self.thisHelpMenu.add_command(label="About Notepad", command=self.showAbout,accelerator='F1')
         self.thisMenuBar.add_cascade(label="Help", menu=self.thisHelpMenu)
 
         self.root.config(menu=self.thisMenuBar)
@@ -89,14 +92,22 @@ class Notepad:
         self.thisScrollBar.config(command=self.thisTextArea.yview)
         self.thisTextArea.config(yscrollcommand=self.thisScrollBar.set)
 
-    def quitApplication(self):
+        self.thisTextArea.bind("<Control-Key-n>", self.newFile)
+        self.thisTextArea.bind("<Control-Key-o>", self.openFile)
+        self.thisTextArea.bind("<Control-Key-s>", self.saveFile)
+        self.thisTextArea.bind("<Control-Key-a>", self.select_all)
+        self.thisTextArea.bind("<Control-Key-f>", self.find)
+        self.thisTextArea.bind("<Control-Key-h>", self.replace)
+        self.thisTextArea.bind("<F1>", self.showAbout)
+
+    def quitApplication(self,event=None):
         self.root.destroy()
         # exit()
 
-    def showAbout(self):
+    def showAbout(self,event=None):
         showinfo("Text-Editor", "Created by: Akul Gupta")
 
-    def openFile(self):
+    def openFile(self,event=None):
 
         self.file = askopenfilename(defaultextension=".txt",
                                     filetypes=[("All Files", "*.*"), ("Text Documents", "*.txt")])
@@ -116,7 +127,7 @@ class Notepad:
 
             file.close()
 
-    def newFile(self):
+    def newFile(self,event=None):
         ok = askyesnocancel("New File", "Do you want to save this file before opening new file?")
         if ok is False:
             self.root.title("Untitled - Text-Editor")
@@ -128,7 +139,7 @@ class Notepad:
             self.file = None
             self.thisTextArea.delete(1.0, END)
 
-    def saveFile(self):
+    def saveFile(self,event=None):
 
         if self.file is None:
             # save as new file
@@ -151,16 +162,38 @@ class Notepad:
             file.write(self.thisTextArea.get(1.0, END))
             file.close()
 
-    def undo(self):
+    def select_all(self, event=None):
+        self.thisTextArea.tag_add('sel', '1.0', 'end')
+        return 'break'
+
+    def undo(self,event=None):
         pass
 
-    def redo(self):
+    def redo(self,event=None):
         pass
 
-    def find(self):
-        pass
+    def find(self,event=None):
 
-    def replace(self):
+        try:
+            self.thisTextArea.tag_remove('highlight', '1.0', END)
+        except:
+            pass
+
+        string = simpledialog.askstring("Find String", "")
+
+        if string == '':
+            return
+
+        start_pos = self.thisTextArea.search(string, '1.0', stopindex=END)
+        # print('{!r}'.format(start_pos))
+        while start_pos:
+            end_pos = '{}+{}c'.format(start_pos, len(string))
+            # print('{!r}'.format(end_pos))
+            self.thisTextArea.tag_add('highlight', start_pos, end_pos)
+            self.thisTextArea.tag_config('highlight', foreground='red')
+            start_pos = self.thisTextArea.search(string, end_pos, stopindex=END)
+
+    def replace(self,event=None):
         pass
 
     def cut(self):
@@ -175,9 +208,13 @@ class Notepad:
     def run(self):
 
         # run main application
+
+
         self.root.mainloop()
 
 
 # run main application
 notepad = Notepad(width=800, height=800)
 notepad.run()
+
+
