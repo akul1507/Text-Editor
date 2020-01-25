@@ -23,12 +23,6 @@ class Notepad:
     def __init__(self, **kwargs):
         # initialization
 
-        # set icon
-        try:
-            self.root.wm_iconbitmap("Notepad.ico")  # GOT TO FIX THIS ERROR (ICON)
-        except:
-            pass
-
         # set window size (the default is 300x300)
 
         try:
@@ -90,7 +84,8 @@ class Notepad:
         self.thisScrollBar.pack(side=RIGHT, fill=Y)
         self.thisScrollBar.config(command=self.thisTextArea.yview)
         self.thisTextArea.config(yscrollcommand=self.thisScrollBar.set)
-
+        
+        #hotkeys to execute the commands
         self.thisTextArea.bind("<Control-Key-n>", self.newFile)
         self.thisTextArea.bind("<Control-Key-o>", self.openFile)
         self.thisTextArea.bind("<Control-Key-s>", self.saveFile)
