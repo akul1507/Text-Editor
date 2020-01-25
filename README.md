@@ -2,4 +2,4 @@
 
 install tkinter
 
-Run Text-Editor.py
+Execute python3 run.py
