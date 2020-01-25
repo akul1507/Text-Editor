@@ -4,7 +4,6 @@ from tkinter import simpledialog
 from tkinter.messagebox import *
 from tkinter.filedialog import *
 
-
 class Notepad:
     # variables
     root = Tk()
@@ -12,7 +11,7 @@ class Notepad:
     # default window width and height
     thisWidth = 300
     thisHeight = 300
-    thisTextArea = Text(root)
+    thisTextArea = Text(root, undo=True)
     thisMenuBar = Menu(root)
     thisFileMenu = Menu(thisMenuBar, tearoff=0)
     thisEditMenu = Menu(thisMenuBar, tearoff=0)
@@ -69,7 +68,7 @@ class Notepad:
         self.thisFileMenu.add_command(label="Exit", command=self.quitApplication, accelerator='Ctrl+Q')
         self.thisMenuBar.add_cascade(label="File", menu=self.thisFileMenu)
 
-        self.thisEditMenu.add_command(label="Select All", command=self.redo, accelerator='Ctrl+A')
+        self.thisEditMenu.add_command(label="Select All", command=self.select_all, accelerator='Ctrl+A')
         self.thisEditMenu.add_separator()
         self.thisEditMenu.add_command(label="Undo", command=self.undo, accelerator='Ctrl+Z')
         self.thisEditMenu.add_command(label="Redo", command=self.redo, accelerator='Ctrl+Y')
@@ -152,12 +151,6 @@ class Notepad:
         self.thisTextArea.tag_add('sel', '1.0', 'end')
         return 'break'
 
-    def undo(self, event=None):
-        pass
-
-    def redo(self, event=None):
-        pass
-
     def find(self, event=None):
         try:
             self.thisTextArea.tag_remove('highlight', '1.0', END)
@@ -166,7 +159,7 @@ class Notepad:
 
         string = simpledialog.askstring("Find String", "")
 
-        if string == '':
+        if string == '' or string is None:
             return
 
         start_pos = self.thisTextArea.search(string, '1.0', stopindex=END)
@@ -179,7 +172,30 @@ class Notepad:
             start_pos = self.thisTextArea.search(string, end_pos, stopindex=END)
 
     def replace(self, event=None):
-        pass
+
+        string = simpledialog.askstring("Find String", "")
+
+        if string is not None:
+            string2 = simpledialog.askstring("Replacement String", "")
+
+        if string is None or string == '':
+            return
+
+        temp = self.thisTextArea.get('1.0', END).replace(string, string2)
+        self.thisTextArea.delete('1.0', END)
+        self.thisTextArea.insert('1.0', temp)
+
+    def undo(self, event=None):
+        try:
+            self.thisTextArea.edit_undo()
+        except:
+            pass
+
+    def redo(self, event=None):
+        try:
+            self.thisTextArea.edit_redo()
+        except:
+            pass
 
     def cut(self):
         self.thisTextArea.event_generate("<<Cut>>")
