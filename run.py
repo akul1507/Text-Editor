@@ -131,7 +131,9 @@ class Notepad:
         createFile = askyesnocancel("New File", "Do you want to save this file before creating a new file?")
         if createFile is True:
             self.saveFile()
-
+        elif createFile is None:
+        	return
+        
         self.root.title("Untitled - Text Editor")
         self.file = None
         self.thisTextArea.delete(1.0, END)
